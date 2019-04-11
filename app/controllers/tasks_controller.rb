@@ -12,10 +12,21 @@ class TasksController < ApplicationController
     @task = Task.new
   end
 
+  def confirm_new
+    @task = current_user.tasks.new(task_params)
+    render :new unless @task.valid?
+  end
+
   def create
     @task = current_user.tasks.new(task_params)
 
+    if params[:back].present?
+      render :new
+      return
+    end
+
     if @task.save
+      logger.debug "task: #{@task.inspect}"
       redirect_to tasks_path, notice: "タスク「#{@task.name}」を登録しました。"
     else 
       render :new
